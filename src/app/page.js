@@ -174,9 +174,6 @@ export default function Login() {
           Entrar
         </button>
 
-        {/* Texto de ayuda para quien no sepa programación: explicación breve */}
-        {/* Este comentario es visible solo en el código y explica que al enviar se intenta autenticar
-            y redirigir a otra página si las credenciales son correctas. */}
       </form>
     </div>
   );
