@@ -1,7 +1,7 @@
 'use client';
 
 // Importamos hooks de React y el enrutador de Next.js (app router)
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 // Componente principal de la pantalla de Login
@@ -38,29 +38,62 @@ export default function Login() {
       return;
     }
 
-  // --- Simulación de autenticación ---
-  // Aquí normalmente llamarías a tu API para autenticar al usuario.
-  // Para la demostración, validamos contra un par de credenciales fijo.
-  const MOCK_EMAIL = "marceadm@lunamar.com";
-  const MOCK_PASS = "1234";
+    /*   // --- Simulación de autenticación ---
+      // Aquí normalmente llamarías a tu API para autenticar al usuario.
+      // Para la demostración, validamos contra un par de credenciales fijo.
+      const MOCK_EMAIL = "marceadm@lunamar.com";
+      const MOCK_PASS = "1234";
+    
+      if (email === MOCK_EMAIL && password === MOCK_PASS) {
+          // Si el usuario marcó "Recordarme", guardamos un indicador en localStorage
+          if (rememberMe) {
+            // Guardamos el email como ejemplo; en producción guarda tokens seguros
+            localStorage.setItem("rememberedUser", JSON.stringify({ email }));
+          }
+    
+          // Redireccionamos a la página de la aplicación cuando el login es correcto.
+          // Sugerencia de nombre de la ruta: "/dashboard" (crea /app/dashboard/page.js)
+          router.push("/dashboard");
+          return;
+        }
+    
+        // Si las credenciales no coinciden, mostramos error general
+        setErrors((prev) => ({ ...prev, general: "Credenciales inválidas. Verifica e inténtalo de nuevo." })); */
 
-  if (email === MOCK_EMAIL && password === MOCK_PASS) {
-      // Si el usuario marcó "Recordarme", guardamos un indicador en localStorage
-      if (rememberMe) {
-        // Guardamos el email como ejemplo; en producción guarda tokens seguros
-        localStorage.setItem("rememberedUser", JSON.stringify({ email }));
-      }
+    const options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ email, password })
+    };
 
-      // Redireccionamos a la página de la aplicación cuando el login es correcto.
-      // Sugerencia de nombre de la ruta: "/dashboard" (crea /app/dashboard/page.js)
-      router.push("/dashboard");
-      return;
-    }
+    console.log("Enviando solicitud de login con opciones:", options);
 
-    // Si las credenciales no coinciden, mostramos error general
-    setErrors((prev) => ({ ...prev, general: "Credenciales inválidas. Verifica e inténtalo de nuevo." }));
-  };
+    fetch("http://localhost:3000/api/v1/auth/login", options)
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Si el usuario marcó "Recordarme", guardamos un indicador en localStorage
+          if (rememberMe) {
+            // Guardamos el email como ejemplo; en producción guarda tokens seguros
+            localStorage.setItem("rememberedUser", JSON.stringify({ email }));
+          }
+          localStorage.setItem("authToken", data.data.token);
 
+          // Redireccionamos a la página de la aplicación cuando el login es correcto.
+          // Sugerencia de nombre de la ruta: "/dashboard" (crea /app/dashboard/page.js)
+          router.push("/dashboard");
+        } else {
+          // Si las credenciales no coinciden, mostramos error general
+          setErrors((prev) => ({ ...prev, general: "Credenciales inválidas. Verifica e inténtalo de nuevo." }));
+        }
+      })
+      .catch(error => {
+        console.error("Error en la solicitud de login:", error);
+        setErrors((prev) => ({ ...prev, general: "Ocurrió un error. Por favor intenta más tarde." }))
+      });
+  }
   return (
     // Contenedor principal: centrado vertical/horizontal
     <div className="flex items-center justify-center min-h-screen p-4">
@@ -87,9 +120,8 @@ export default function Login() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className={`w-full px-3 py-2 text-gray-600 border rounded placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-              errors.email ? "border-red-500" : "border-gray-300"
-            }`}
+            className={`w-full px-3 py-2 text-gray-600 border rounded placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 ${errors.email ? "border-red-500" : "border-gray-300"
+              }`}
             placeholder="default@ejemplo.com"
             aria-invalid={errors.email ? "true" : "false"}
             aria-describedby={errors.email ? "email-error" : undefined}
@@ -115,9 +147,8 @@ export default function Login() {
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className={`w-full px-3 py-2 text-gray-600 border rounded placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-                errors.password ? "border-red-500" : "border-gray-300"
-              }`}
+              className={`w-full px-3 py-2 text-gray-600 border rounded placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 ${errors.password ? "border-red-500" : "border-gray-300"
+                }`}
               placeholder="Tu contraseña"
               aria-invalid={errors.password ? "true" : "false"}
               aria-describedby={errors.password ? "password-error" : undefined}
