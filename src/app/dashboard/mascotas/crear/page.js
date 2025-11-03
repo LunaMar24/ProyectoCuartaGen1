@@ -95,12 +95,18 @@ export default function CrearMascotaPage() {
         setOk("Mascota creada correctamente");
         setTimeout(() => router.push("/dashboard/mascotas"), 800);
       } else {
-        setError(data?.message || "No se pudo crear la mascota");
+        const baseMsg = data?.message || "No se pudo crear la mascota";
+        const extra = data?.error ? ` - ${data.error}` : "";
+        setError(`${baseMsg}${extra}`);
         const arr = Array.isArray(data?.errors) ? data.errors : [];
         if (arr.length) {
-          const byField = {}; setErrorList(arr.map((e) => e.msg || e.message || JSON.stringify(e)));
+          const byField = {};
+          setErrorList(arr.map((e) => e.msg || e.message || JSON.stringify(e)));
           arr.forEach((e) => { const key = e.field || e.path || e.param || ""; if (!key) return; if (!byField[key]) byField[key] = []; byField[key].push(e.msg || e.message || "Error"); });
           setFieldErrors(byField);
+        } else {
+          // Si no hay errores por campo, no mostramos el detalle duplicado del "error" global
+          setErrorList([]);
         }
       }
     } catch (_) { setError("Error de conexión"); }

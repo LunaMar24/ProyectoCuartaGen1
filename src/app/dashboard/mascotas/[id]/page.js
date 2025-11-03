@@ -13,6 +13,7 @@ export default function EditarMascotaPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [loadError, setLoadError] = useState("");
   const [ok, setOk] = useState("");
   const [errorList, setErrorList] = useState([]);
   const [fieldErrors, setFieldErrors] = useState({});
@@ -37,8 +38,8 @@ export default function EditarMascotaPage() {
   }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem("authToken");
-    if (!token || !id) { setError("Falta token o id"); setLoading(false); return; }
+  const token = localStorage.getItem("authToken");
+  if (!token || !id) { setLoadError("Falta token o id"); setLoading(false); return; }
     fetch(`${API_BASE}/mascotas/${id}`, {
       method: "GET",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -91,7 +92,7 @@ export default function EditarMascotaPage() {
           prefillOwnerByLabel(propLabel);
         }
       })
-      .catch(() => setError("No se pudo cargar la mascota"))
+    .catch(() => setLoadError("No se pudo cargar la mascota"))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -193,19 +194,24 @@ export default function EditarMascotaPage() {
         setOk("Mascota actualizada correctamente");
         setTimeout(() => router.push("/dashboard/mascotas"), 800);
       } else {
-        setError(data?.message || "No se pudo actualizar la mascota");
+        const baseMsg = data?.message || "No se pudo actualizar la mascota";
+        const extra = data?.error ? ` - ${data.error}` : "";
+        setError(`${baseMsg}${extra}`);
         const arr = Array.isArray(data?.errors) ? data.errors : [];
-        if (arr.length) {
-          const byField = {};
-          setErrorList(arr.map((e) => e.msg || e.message || JSON.stringify(e)));
-          arr.forEach((e) => {
-            const key = e.field || e.path || e.param || "";
-            if (!key) return;
-            if (!byField[key]) byField[key] = [];
-            byField[key].push(e.msg || e.message || "Error");
-          });
-          setFieldErrors(byField);
-        }
+          if (arr.length) {
+            const byField = {};
+            setErrorList(arr.map((e) => e.msg || e.message || JSON.stringify(e)));
+            arr.forEach((e) => {
+              const key = e.field || e.path || e.param || "";
+              if (!key) return;
+              if (!byField[key]) byField[key] = [];
+              byField[key].push(e.msg || e.message || "Error");
+            });
+            setFieldErrors(byField);
+          } else {
+            // Evitar duplicado: no agregar el error global como item de la lista
+            setErrorList([]);
+          }
       }
     } catch (_) { setError("Error de conexión"); }
     finally { setSaving(false); }
@@ -217,10 +223,11 @@ export default function EditarMascotaPage() {
       <p className="text-slate-300 text-sm mb-4">Actualiza la información de la mascota.</p>
 
       {loading && <p className="text-slate-300 text-sm">Cargando...</p>}
+      {!loading && loadError && <p className="text-rose-300 text-sm mb-3">{loadError}</p>}
       {!loading && error && <p className="text-rose-300 text-sm mb-3">{error}</p>}
       {!loading && ok && <p className="text-emerald-300 text-sm mb-3">{ok}</p>}
 
-      {!loading && !error && (
+      {!loading && !loadError && (
         <form onSubmit={onSubmit} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {/* Combobox de Propietario */}
           <div className="sm:col-span-2" ref={boxRef}>
