@@ -177,7 +177,14 @@ export default function CrearUsuarioPage() {
           )}
         </div>
 
-        <div className="pt-2">
+        <div className="pt-2 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => router.push("/dashboard/usuarios")}
+            className="rounded-md border border-slate-600 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700/50"
+          >
+            Cancelar
+          </button>
           <button
             type="submit"
             disabled={loading}

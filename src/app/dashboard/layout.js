@@ -104,6 +104,22 @@ export default function DashboardLayout({ children }) {
     []
   );
 
+  // Etiqueta de sección actual para mostrar al usuario dónde está
+  const sectionLabel = useMemo(() => {
+    const parts = (pathname || "").split("/");
+    const i = parts.indexOf("dashboard");
+    const key = i >= 0 ? parts[i + 1] || "" : "";
+    const map = {
+      usuarios: "Usuarios",
+      propietarios: "Propietarios",
+      mascotas: "Mascotas",
+      historiales: "Historiales",
+      profile: "Perfil",
+      "": "Panel",
+    };
+    return map[key] || "Panel";
+  }, [pathname]);
+
   return (
     <div className="min-h-screen w-full bg-slate-900 text-slate-100 flex">
       {/* Sidebar (Desktop) */}
@@ -165,6 +181,10 @@ export default function DashboardLayout({ children }) {
               VETERINARIA
             </Link>
             <span className="hidden sm:inline text-slate-400 text-sm">LunaMar</span>
+            {/* Indicador de sección actual, a la derecha de 'LunaMar' */}
+            <span className="ml-2 inline-flex items-center rounded-full border border-emerald-400/30 bg-emerald-500/10 text-emerald-300 text-xs px-2 py-0.5">
+              {sectionLabel}
+            </span>
           </div>
 
           <div className="flex items-center gap-3">
