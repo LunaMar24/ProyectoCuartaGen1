@@ -8,7 +8,7 @@ export default function DashboardLayout({ children }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const [user, setUser] = useState({ nombre: "Usuario", email: "", rol: "" });
+  const [user, setUser] = useState({ nombre: "Usuario", email: "" });
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -62,8 +62,8 @@ export default function DashboardLayout({ children }) {
       .then((r) => r.json())
       .then((data) => {
         if (data?.success && data?.data) {
-          const { nombre, email, rol } = data.data;
-          setUser({ nombre: nombre || "Usuario", email: email || user.email, rol: rol || "" });
+          const { nombre, email } = data.data;
+          setUser({ nombre: nombre || "Usuario", email: email || user.email });
         }
       })
       .finally(() => setLoading(false));
@@ -96,7 +96,8 @@ export default function DashboardLayout({ children }) {
 
   const menuItems = useMemo(
     () => [
-      { href: "/dashboard", label: "Dashboard" },
+      // Ajustado: Dashboard -> Usuarios
+      { href: "/dashboard/usuarios", label: "Usuarios" },
       { href: "/dashboard/propietarios", label: "Propietarios" },
       { href: "/dashboard/mascotas", label: "Mascotas" },
     ],
@@ -171,9 +172,7 @@ export default function DashboardLayout({ children }) {
               <p className="text-sm font-medium text-slate-100 leading-4">
                 {loading ? "Cargando..." : user.nombre}
               </p>
-              <p className="text-xs text-slate-400 leading-4">
-                {user.rol ? `Rol: ${user.rol}` : user.email}
-              </p>
+              <p className="text-xs text-slate-400 leading-4">{user.email}</p>
             </div>
             <Link
               href="/dashboard/profile"
