@@ -40,8 +40,8 @@ export default function UsuariosListPage() {
     const p = data?.pagination || data?.meta || data?.pageInfo || {};
     const current = p.page ?? p.currentPage ?? data?.page ?? 1;
     const per = p.limit ?? p.perPage ?? p.pageSize ?? data?.limit ?? limit;
-    const totalPages = p.totalPages ?? p.pages ?? Math.max(1, Math.ceil((p.total ?? p.totalUsers ?? data?.total ?? items.length) / (per || 10)));
-    const total = (p.totalUsers ?? p.total) ?? data?.total ?? items.length;
+    const totalPages = p.totalPages ?? p.pages ?? Math.max(1, Math.ceil((p.total ?? data?.total ?? items.length) / (per || 10)));
+    const total = p.total ?? data?.total ?? items.length;
     return { page: current, limit: per, totalPages, total };
   };
 
@@ -168,7 +168,7 @@ export default function UsuariosListPage() {
             {!loading && !error && items.length === 0 && (<tr><td className="px-4 py-3 text-slate-300" colSpan={5}>Sin usuarios</td></tr>)}
             {!loading && !error && items.map((u) => {
               const id = u.id ?? u._id;
-              const created = u.fecha_creacion;
+              const created = u.fecha_creacion || u.createdAt || u.fechaCreacion;
               return (
                 <tr key={id} className="border-t border-white/10">
                   <td className="px-4 py-2">{u.nombre || u.name || "-"}</td>

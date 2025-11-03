@@ -67,10 +67,9 @@ export default function CrearUsuarioPage() {
     }
 
     try {
-      const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
-      const res = await fetch(`${API_BASE}/users`, {
+      const res = await fetch(`${API_BASE}/auth/register`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
       const data = await res.json().catch(() => ({}));
