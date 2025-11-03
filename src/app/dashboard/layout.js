@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 export default function DashboardLayout({ children }) {
@@ -11,6 +11,8 @@ export default function DashboardLayout({ children }) {
   const [user, setUser] = useState({ nombre: "Usuario", email: "", rol: "" });
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef(null);
 
   // Determina si una ruta del menú está activa
   const isActive = (href) => pathname?.startsWith(href);
@@ -70,11 +72,27 @@ export default function DashboardLayout({ children }) {
   // Cierra el sidebar móvil con la tecla Escape
   useEffect(() => {
     const onKey = (e) => {
-      if (e.key === "Escape") setSidebarOpen(false);
+      if (e.key === "Escape") {
+        setSidebarOpen(false);
+        setUserMenuOpen(false);
+      }
     };
     if (sidebarOpen) window.addEventListener("keydown", onKey);
+    if (userMenuOpen) window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [sidebarOpen]);
+  }, [sidebarOpen, userMenuOpen]);
+
+  // Cierra el menú del usuario si hace click fuera
+  useEffect(() => {
+    if (!userMenuOpen) return;
+    const onClick = (e) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [userMenuOpen]);
 
   const menuItems = useMemo(
     () => [
@@ -129,7 +147,7 @@ export default function DashboardLayout({ children }) {
       {/* Main area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Topbar */}
-        <header className="h-14 bg-slate-800/90 backdrop-blur border-b border-slate-700 flex items-center justify-between px-4">
+  <header className="h-14 bg-slate-800/90 backdrop-blur border-b border-slate-700 flex items-center justify-between px-4 relative z-40">
           <div className="flex items-center gap-3">
             {/* Hamburger (solo móvil) */}
             <button
@@ -165,11 +183,54 @@ export default function DashboardLayout({ children }) {
             </Link>
             <button
               onClick={handleLogout}
-              className="rounded-md bg-rose-600 hover:bg-rose-700 px-3 py-1.5 text-xs font-semibold text-white"
+              className="hidden sm:inline rounded-md bg-rose-600 hover:bg-rose-700 px-3 py-1.5 text-xs font-semibold text-white"
             >
               Logout
             </button>
-            <div className="h-8 w-8 rounded-full bg-slate-600 ring-2 ring-emerald-400/60" />
+            {/* Avatar desktop */}
+            <div className="hidden sm:block h-8 w-8 rounded-full bg-slate-600 ring-2 ring-emerald-400/60" />
+
+            {/* Avatar + menú móvil */}
+            <div className="relative sm:hidden" ref={userMenuRef}>
+              <button
+                type="button"
+                aria-label="Abrir menú de usuario"
+                aria-haspopup="menu"
+                aria-expanded={userMenuOpen}
+                onClick={() => setUserMenuOpen((v) => !v)}
+                className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-slate-600 ring-2 ring-emerald-400/60"
+              />
+              {userMenuOpen && (
+                <div
+                  role="menu"
+                  className="absolute right-0 mt-2 w-44 z-[70] rounded-md border border-slate-700 bg-slate-800 shadow-lg py-1"
+                >
+                  <div className="px-3 py-2 text-xs text-slate-300">
+                    {loading ? "Cargando..." : user.nombre}
+                  </div>
+                  <button
+                    onClick={() => {
+                      setUserMenuOpen(false);
+                      router.push("/dashboard/profile");
+                    }}
+                    className="w-full text-left px-3 py-2 text-xs hover:bg-slate-700 text-slate-200"
+                    role="menuitem"
+                  >
+                    Perfil
+                  </button>
+                  <button
+                    onClick={() => {
+                      setUserMenuOpen(false);
+                      handleLogout();
+                    }}
+                    className="w-full text-left px-3 py-2 text-xs hover:bg-slate-700 text-rose-300"
+                    role="menuitem"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 

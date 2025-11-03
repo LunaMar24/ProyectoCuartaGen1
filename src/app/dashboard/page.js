@@ -74,13 +74,13 @@ export default function Dashboard() {
                 {profile && (
                     <>
                         <h1 className="title">¡Bienvenid@, {profile.nombre}!</h1>
-                        <p className="subtitle">
-                            Email: {profile.email} <br />
-                            Teléfono: {profile.telefono}
-                        </p>
-                        <p className="subtitle" style={{ marginTop: "10px", fontSize: "14px" }}>
-                            Usuario desde: {new Date(profile.fecha_creacion).toLocaleDateString()}
-                        </p>
+
+                        {/* Datos del usuario (formato responsive) */}
+                        <div className="details">
+                            <p className="subtitle"><span className="label">Email:</span> {profile.email}</p>
+                            <p className="subtitle"><span className="label">Teléfono:</span> {profile.telefono}</p>
+                            <p className="subtitle"><span className="label">Usuario desde:</span> {new Date(profile.fecha_creacion).toLocaleDateString()}</p>
+                        </div>
 
                         {/* 🔹 Botón de Logout */}
                         <button onClick={handleLogout} className="logout-btn">
@@ -91,8 +91,8 @@ export default function Dashboard() {
             </div>
 
             <style jsx>{`
-        .wrap {
-          min-height: 100vh;
+                .wrap {
+                    min-height: 100vh;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -133,12 +133,26 @@ export default function Dashboard() {
           transition: transform 240ms ease;
         }
 
-        .subtitle {
+                .subtitle {
           margin: 0;
           color: rgba(255,255,255,0.8);
           font-size: clamp(14px, 2.4vw, 18px);
           opacity: 0.95;
         }
+
+                .details { 
+                    margin-top: 12px; 
+                    display: grid; 
+                    grid-template-columns: 1fr; 
+                    row-gap: 6px;
+                    word-break: break-word;
+                }
+
+                .label { 
+                    color: rgba(255,255,255,0.7); 
+                    margin-right: 6px; 
+                    font-weight: 600; 
+                }
 
         .logout-btn {
           margin-top: 20px;
@@ -156,11 +170,47 @@ export default function Dashboard() {
           background: linear-gradient(90deg, #dc2626 0%, #b91c1c 100%);
         }
 
-        @keyframes float {
+                @keyframes float {
           0% { transform: translateY(0px); }
           50% { transform: translateY(-50px); }
           100% { transform: translateY(0px); }
         }
+                @keyframes floatSm {
+                    0% { transform: translateY(0px); }
+                    50% { transform: translateY(-20px); }
+                    100% { transform: translateY(0px); }
+                }
+
+                /* Ajustes para pantallas móviles */
+                @media (max-width: 640px) {
+                    .wrap {
+                        min-height: auto; /* el contenedor padre ya maneja la altura */
+                        align-items: flex-start;
+                        padding: 16px;
+                    }
+                                .card {
+                                    padding: 20px 16px;
+                                    /* Mantener animación en móvil pero con menor amplitud */
+                                    animation: floatSm 6s ease-in-out infinite;
+                                }
+                    .title {
+                        font-size: clamp(28px, 9vw, 40px);
+                        margin-bottom: 8px;
+                    }
+                    .subtitle {
+                        font-size: 14px;
+                    }
+                    .logout-btn {
+                        width: 100%;
+                        padding: 10px 14px;
+                        margin-top: 14px;
+                    }
+                }
+        
+                        /* Respeta la preferencia del usuario para reducir movimiento */
+                        @media (prefers-reduced-motion: reduce) {
+                            .card { animation: none !important; transform: none !important; }
+                        }
       `}</style>
         </main>
     );
